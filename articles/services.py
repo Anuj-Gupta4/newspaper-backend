@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Iterable, Optional, Sequence
 
+from email.utils import parsedate_to_datetime
 import httpx
 from django.utils import timezone
 
@@ -64,7 +65,9 @@ def sync_single_feed(feed: RSSFeed) -> None:
         guid_el = item.find("guid") or item.find("{*}id")
         desc_el = (
             item.find("description")
+            or item.find("{*}description")
             or item.find("{*}summary")
+            or item.find("{*}encoded")
             or item.find("{*}content")
         )
 
@@ -84,16 +87,45 @@ def sync_single_feed(feed: RSSFeed) -> None:
         external_id = (
             (guid_el.text or "").strip() if guid_el is not None else link
         )
-        summary = (desc_el.text or "").strip() if desc_el is not None else ""
 
+        # Summary / content
+        summary = ""
+        if desc_el is not None:
+            try:
+                summary = "".join(desc_el.itertext()).strip()
+            except Exception:
+                summary = (desc_el.text or "").strip()
+
+        if not summary:
+            nested_desc = item.find(".//{*}description") or item.find(
+                ".//{*}summary"
+            )
+            if nested_desc is not None and nested_desc.text:
+                summary = nested_desc.text.strip()
+
+        # Author
+        author_el = (
+            item.find("author")
+            or item.find("{*}creator")
+            or item.find("{*}author")
+        )
+        author = (author_el.text or "").strip() if author_el is not None else ""
+
+        # Language – BBC and others are English; keep simple
+        language = "en"
+
+        # Published date
         published_dt: Optional[datetime] = None
         pub_el = item.find("pubDate") or item.find("{*}published")
         if pub_el is not None and pub_el.text:
+            text = pub_el.text.strip()
             try:
-                # Let Django handle naive parsing; this is intentionally loose.
-                published_dt = datetime.fromisoformat(pub_el.text.strip())
-            except ValueError:
-                published_dt = None
+                published_dt = parsedate_to_datetime(text)
+            except (TypeError, ValueError):
+                try:
+                    published_dt = datetime.fromisoformat(text)
+                except ValueError:
+                    published_dt = None
 
         published_at = _guess_published_at(published_dt)
 
@@ -105,6 +137,8 @@ def sync_single_feed(feed: RSSFeed) -> None:
                 "summary": summary,
                 "content": summary,
                 "url": link,
+                "author": author,
+                "language": language,
                 "published_at": published_at,
             },
         )
