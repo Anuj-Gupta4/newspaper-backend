@@ -1,4 +1,4 @@
-# 📰 Newspaper RSS API (Django)
+# Newspaper RSS API (Django)
 
 A backend service built using **Django** and **Django REST Framework** that aggregates news from external RSS feeds, stores them in a database, and exposes them via APIs for frontend applications.
 
@@ -6,20 +6,21 @@ The project follows a modular architecture with separate apps for **authenticati
 
 ---
 
-## 🚀 Features
+## Features
 
-- 📡 Fetch news articles from external RSS feeds  
-- 🗂 Store and manage articles in the database  
-- 🔗 Expose news via REST APIs  
-- ❤️ Like/unlike posts  
-- 🔐 User authentication (register, login, logout)  
-- 🛠 Admin panel for managing feeds and posts  
-- ✏️ Edit RSS sources and articles via admin  
-- 🔄 Manual or scheduled RSS syncing  
+- Fetch news articles from external RSS feeds  
+- Store and manage articles in the database  
+- Expose news via REST APIs  
+- Like/unlike posts  
+- User authentication (register, login, logout)  
+- Redis caching for improved API performance  
+- Admin panel for managing feeds and posts  
+- Edit RSS sources and articles via admin  
+- Manual or scheduled RSS syncing  
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 newspaper-backend/
@@ -34,19 +35,23 @@ newspaper-backend/
 │   ├── admin.py
 │   ├── apps.py
 │   ├── models.py
-│   ├── tests.py
-│   └── views.py
+│   ├── serializers.py
+│   ├── urls.py
+│   ├── views.py
+│   └── tests.py
 └── users/
     ├── admin.py
     ├── apps.py
     ├── models.py
-    ├── tests.py
-    └── views.py
+    ├── serializers.py
+    ├── urls.py
+    ├── views.py
+    └── tests.py
 ```
 
 - `manage.py`: Django management entry point
-- `newspaper/`: Main project configuration, settings, and URL routing
-- `articles/`: News article domain logic, admin setup, API views, and tests
-- `users/`: Authentication and user-related logic, admin setup, API views, and tests
+- `newspaper/`: Main project configuration, settings, and root URL routing
+- `articles/`: Article domain logic including models, serializers, API views, and app routes
+- `users/`: Authentication and user-related logic including models, serializers, API views, and app routes
 
 
