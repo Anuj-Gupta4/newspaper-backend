@@ -12,7 +12,7 @@ The project follows a modular architecture with separate apps for **authenticati
 - Store and manage articles in the database  
 - Expose news via REST APIs  
 - Like/unlike posts  
-- User authentication (register, login, logout)  
+- User authentication with JWT bearer tokens  
 - Redis caching for improved API performance  
 - Admin panel for managing feeds and posts  
 - Edit RSS sources and articles via admin  
@@ -55,3 +55,7 @@ newspaper-backend/
 - `users/`: Authentication and user-related logic including models, serializers, API views, and app routes
 
 
+Notes:
+
+- Keep the endpoint responses consistent throughout the app
+- Authenticate protected endpoints with `Authorization: Bearer <access_token>`
