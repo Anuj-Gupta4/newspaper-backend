@@ -18,7 +18,10 @@ def _guess_published_at(published: Optional[datetime]) -> datetime:
     return published
 
 
-def sync_all_feeds(feed_ids: Optional[Sequence[int]] = None) -> None:
+def sync_all_feeds(
+    feed_ids: Optional[Sequence[int]] = None,
+    categories: Optional[Sequence[str]] = None,
+) -> None:
     """
     Fetch all active RSS feeds and upsert their articles.
 
@@ -27,6 +30,8 @@ def sync_all_feeds(feed_ids: Optional[Sequence[int]] = None) -> None:
     qs = RSSFeed.objects.filter(is_active=True)
     if feed_ids:
         qs = qs.filter(id__in=feed_ids)
+    if categories:
+        qs = qs.filter(category__in=categories)
 
     feeds: Iterable[RSSFeed] = qs
 

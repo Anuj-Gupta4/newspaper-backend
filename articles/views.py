@@ -27,32 +27,20 @@ class ArticleListView(ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        feed_id = request.query_params.get("feed_id")
+        category = request.query_params.get("category")
 
-        feed_ids = None
-        queryset = Article.objects.all()
+        # Default category if none provided
+        if not category:
+            category = RSSFeed.WORLD_NEWS
 
-        if feed_id:
-            try:
-                feed_obj = RSSFeed.objects.get(id=feed_id, is_active=True)
-            except RSSFeed.DoesNotExist:
-                queryset = queryset.none()
-            else:
-                feed_ids = [feed_obj.id]
-                queryset = queryset.filter(feed=feed_obj)
-        else:
-            # Default feed: first active feed by name
-            default_feed = (
-                RSSFeed.objects.filter(is_active=True).order_by("name").first()
-            )
-            if default_feed is not None:
-                feed_ids = [default_feed.id]
-                queryset = queryset.filter(feed=default_feed)
-            else:
-                queryset = queryset.none()
+        # Only allow known categories; unknown category returns empty
+        allowed = {choice[0] for choice in RSSFeed.CATEGORY_CHOICES}
+        if category not in allowed:
+            return Article.objects.none()
 
-        if feed_ids:
-            sync_all_feeds(feed_ids=feed_ids)
+        sync_all_feeds(categories=[category])
+
+        queryset = Article.objects.filter(feed__category=category, feed__is_active=True)
 
         return (
             queryset.select_related("feed")
