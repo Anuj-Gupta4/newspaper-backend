@@ -134,6 +134,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Admin bulk actions (like deleting many rows) can send a lot of fields.
+# Increase this to avoid TooManyFieldsSent when selecting many articles.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100_000
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
