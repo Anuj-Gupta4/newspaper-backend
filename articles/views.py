@@ -17,9 +17,9 @@ class ArticleListView(ListAPIView):
     """
     GET /api/articles/
 
-    On each request:
-    - Pulls latest RSS data into the database (simple sync).
-    - Returns a paginated list of articles from the DB.
+    On request:
+    - If the requested category has no stored articles yet, pull the feed once.
+    - Otherwise, return articles from the DB without syncing again.
     """
 
     serializer_class = ArticleSerializer
@@ -38,9 +38,10 @@ class ArticleListView(ListAPIView):
         if category not in allowed:
             return Article.objects.none()
 
-        sync_all_feeds(categories=[category])
-
         queryset = Article.objects.filter(feed__category=category, feed__is_active=True)
+        if not queryset.exists():
+            sync_all_feeds(categories=[category])
+            queryset = Article.objects.filter(feed__category=category, feed__is_active=True)
 
         return (
             queryset.select_related("feed")

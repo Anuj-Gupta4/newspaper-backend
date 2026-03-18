@@ -7,13 +7,12 @@ class ArticlesConfig(AppConfig):
 
     def ready(self) -> None:
         """
-        On first startup:
+        On startup:
         - Ensure a default set of RSSFeed rows exist.
-        - Trigger an initial sync, but only for feeds without articles.
+        - Do not auto-sync articles; article fetches happen lazily on first request.
         """
         try:
             from .models import RSSFeed
-            from .services import sync_all_feeds
         except Exception:
             # Avoid breaking migrations / startup if imports fail.
             return
@@ -52,8 +51,6 @@ class ArticlesConfig(AppConfig):
                     },
                 )
 
-            # Auto-pull RSS feeds on first startup, but only for feeds without articles.
-            sync_all_feeds()
         except Exception:
             # Swallow errors so app can still start; logging can be added later.
             return
