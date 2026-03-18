@@ -139,3 +139,22 @@ class ArticleLikesCountView(GenericAPIView):
             }
         )
 
+
+@extend_schema(
+    responses={status.HTTP_200_OK: ArticleSerializer(many=True)},
+    description="Return the authenticated user's liked articles (paginated).",
+)
+class LikedArticlesView(ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ArticleSerializer
+    pagination_class = ArticlePagination
+
+    def get_queryset(self):
+        return (
+            Article.objects.filter(likes__user=self.request.user)
+            .select_related("feed")
+            .prefetch_related("tags")
+            .annotate(likes_count=Count("likes"))
+            .order_by("-published_at")
+        )
+
