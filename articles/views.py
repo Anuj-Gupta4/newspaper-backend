@@ -1,10 +1,13 @@
 from django.db.models import Count
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
-from rest_framework.generics import ListAPIView
+from drf_spectacular.utils import extend_schema
+from rest_framework import permissions, status
+from rest_framework.generics import GenericAPIView, ListAPIView, get_object_or_404
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
-from .models import Article, RSSFeed
-from .serializers import ArticleSerializer
+from .models import Article, ArticleLike, RSSFeed
+from .serializers import ArticleLikesResponseSerializer, ArticleSerializer
 from .services import sync_all_feeds
 
 
@@ -62,5 +65,77 @@ class ArticleListView(ListAPIView):
             queryset.select_related("feed")
             .prefetch_related("tags")
             .annotate(likes_count=Count("likes"))
+        )
+
+
+class ArticleLikeView(GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ArticleLikesResponseSerializer
+
+    def get_article(self):
+        return get_object_or_404(Article, pk=self.kwargs["article_id"])
+
+    def _likes_payload(self, article_id: int, liked: bool) -> dict:
+        return {
+            "article_id": article_id,
+            "likes_count": ArticleLike.objects.filter(article_id=article_id).count(),
+            "liked": liked,
+        }
+
+    @extend_schema(
+        request=None,
+        responses={status.HTTP_200_OK: ArticleLikesResponseSerializer},
+    )
+    def post(self, request, article_id: int):
+        article = self.get_article()
+        _, created = ArticleLike.objects.get_or_create(user=request.user, article=article)
+
+        return Response(
+            {
+                "message": "Article liked successfully."
+                if created
+                else "Article already liked.",
+                "data": self._likes_payload(article.id, liked=True),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        responses={status.HTTP_200_OK: ArticleLikesResponseSerializer},
+    )
+    def delete(self, request, article_id: int):
+        article = self.get_article()
+        deleted, _ = ArticleLike.objects.filter(user=request.user, article=article).delete()
+
+        return Response(
+            {
+                "message": "Article disliked successfully."
+                if deleted
+                else "Article was not liked.",
+                "data": self._likes_payload(article.id, liked=False),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class ArticleLikesCountView(GenericAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = ArticleLikesResponseSerializer
+
+    @extend_schema(
+        responses={status.HTTP_200_OK: ArticleLikesResponseSerializer},
+    )
+    def get(self, request, article_id: int):
+        article = get_object_or_404(Article, pk=article_id)
+        likes_count = ArticleLike.objects.filter(article=article).count()
+
+        return Response(
+            {
+                "message": "Article likes count fetched successfully.",
+                "data": {
+                    "article_id": article.id,
+                    "likes_count": likes_count,
+                },
+            }
         )
 

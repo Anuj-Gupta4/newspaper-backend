@@ -41,3 +41,13 @@ class ArticleSerializer(serializers.ModelSerializer):
             "likes_count",
         ]
 
+
+class ArticleLikesDataSerializer(serializers.Serializer):
+    article_id = serializers.IntegerField()
+    likes_count = serializers.IntegerField()
+    liked = serializers.BooleanField(required=False)
+
+
+class ArticleLikesResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    data = ArticleLikesDataSerializer()
