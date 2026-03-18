@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure--6vesmby_eho$i^ga5%myr^ap97dm2y#n==&dme^#i#z58@vh2
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'seral-parker-noncommittally.ngrok-free.dev','127.0.0.1', 'https://avinto-ai-news-portal.vercel.app'
+    'seral-parker-noncommittally.ngrok-free.dev','127.0.0.1', 'https://avinto-ai-news-portal.vercel.app', 'loppy-nonpersistently-verdie.ngrok-free.dev'
 ]
 
 
