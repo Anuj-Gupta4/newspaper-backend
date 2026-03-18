@@ -17,6 +17,7 @@ class RSSFeedSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     feed = RSSFeedSerializer(read_only=True)
+    feed_category = serializers.CharField(source="feed.category", read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     likes_count = serializers.IntegerField(read_only=True)
 
@@ -35,6 +36,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "published_at",
             "fetched_at",
             "feed",
+            "feed_category",
             "tags",
             "likes_count",
         ]

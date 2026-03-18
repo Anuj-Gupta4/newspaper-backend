@@ -1,4 +1,5 @@
 from django.db.models import Count
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 
@@ -13,6 +14,20 @@ class ArticlePagination(PageNumberPagination):
     max_page_size = 100
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="category",
+            type=OpenApiTypes.STR,
+            required=False,
+            description=(
+                "Filter articles by RSS feed category. "
+                f"Allowed: {', '.join([c[0] for c in RSSFeed.CATEGORY_CHOICES])}. "
+                f"Default: {RSSFeed.WORLD_NEWS}."
+            ),
+        ),
+    ],
+)
 class ArticleListView(ListAPIView):
     """
     GET /api/articles/
