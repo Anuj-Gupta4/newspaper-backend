@@ -31,24 +31,9 @@ class ArticlesConfig(AppConfig):
                     "category": RSSFeed.WORLD_NEWS,
                 },
                 {
-                    "name": "NYTimes Home",
-                    "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-                    "category": RSSFeed.WORLD_NEWS,
-                },
-                {
                     "name": "Simplecast Feed",
                     "url": "https://feeds.simplecast.com/qm_9xx0g",
                     "category": RSSFeed.OTHER,
-                },
-                {
-                    "name": "CBN US News",
-                    "url": "https://www1.cbn.com/app_feeds/rss/news/rss.php?section=us",
-                    "category": RSSFeed.WORLD_NEWS,
-                },
-                {
-                    "name": "The Guardian World",
-                    "url": "https://www.theguardian.com/world/rss",
-                    "category": RSSFeed.WORLD_NEWS,
                 },
                 {
                     "name": "OpenAI News",
